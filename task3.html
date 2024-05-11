@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        input[type="text"], input[type="tel"], input[type="email"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        #contactForm, #editForm {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Contact Manager</h1>
+    <button onclick="showAddForm()">Add New Contact</button>
+    <div id="contactForm">
+        <h2>Add New Contact</h2>
+        <form onsubmit="addContact(event)">
+            <label for="name">Name:</label>
+            <input type="text" id="name" required>
+            <label for="phone">Phone Number:</label>
+            <input type="tel" id="phone" required>
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" required>
+            <button type="submit">Add Contact</button>
+        </form>
+    </div>
+    <div id="contacts">
+        <h2>Contact List</h2>
+        <table id="contactTable">
+            <tr>
+                <th>Name</th>
+                <th>Phone Number</th>
+                <th>Email Address</th>
+                <th>Action</th>
+            </tr>
+        </table>
+    </div>
+    <div id="editForm">
+        <h2>Edit Contact</h2>
+        <form onsubmit="editContact(event)">
+            <input type="hidden" id="editIndex">
+            <label for="editName">Name:</label>
+            <input type="text" id="editName" required>
+            <label for="editPhone">Phone Number:</label>
+            <input type="tel" id="editPhone" required>
+            <label for="editEmail">Email Address:</label>
+            <input type="email" id="editEmail" required>
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+
+    <script>
+        let contacts = JSON.parse(localStorage.getItem("contacts")) || [];
+
+        function renderContacts() {
+            const contactTable = document.getElementById("contactTable");
+            contactTable.innerHTML = `
+                <tr>
+                    <th>Name</th>
+                    <th>Phone Number</th>
+                    <th>Email Address</th>
+                    <th>Action</th>
+                </tr>
+            `;
+            contacts.forEach((contact, index) => {
+                contactTable.innerHTML += `
+                    <tr>
+                        <td>${contact.name}</td>
+                        <td>${contact.phone}</td>
+                        <td>${contact.email}</td>
+                        <td>
+                            <button onclick="showEditForm(${index})">Edit</button>
+                            <button onclick="deleteContact(${index})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            localStorage.setItem("contacts", JSON.stringify(contacts));
+        }
+
+        function showAddForm() {
+            document.getElementById("contactForm").style.display = "block";
+        }
+
+        function addContact(event) {
+            event.preventDefault();
+            const name = document.getElementById("name").value;
+            const phone = document.getElementById("phone").value;
+            const email = document.getElementById("email").value;
+            contacts.push({ name, phone, email });
+            renderContacts();
+            document.getElementById("contactForm").reset();
+            document.getElementById("contactForm").style.display = "none";
+        }
+
+        function showEditForm(index) {
+            document.getElementById("editIndex").value = index;
+            const contact = contacts[index];
+            document.getElementById("editName").value = contact.name;
+            document.getElementById("editPhone").value = contact.phone;
+            document.getElementById("editEmail").value = contact.email;
+            document.getElementById("editForm").style.display = "block";
+        }
+
+        function editContact(event) {
+            event.preventDefault();
+            const index = document.getElementById("editIndex").value;
+            contacts[index].name = document.getElementById("editName").value;
+            contacts[index].phone = document.getElementById("editPhone").value;
+            contacts[index].email = document.getElementById("editEmail").value;
+            renderContacts();
+            document.getElementById("editForm").reset();
+            document.getElementById("editForm").style.display = "none";
+        }
+
+        function deleteContact(index) {
+            if (confirm("Are you sure you want to delete this contact?")) {
+                contacts.splice(index, 1);
+                renderContacts();
+            }
+        }
+
+        renderContacts();
+    </script>
+</body>
+</html>
